@@ -1,6 +1,6 @@
 import { btPrint } from 'hy-algokit';
 
-class TreeNode<T> {
+export class TreeNode<T> {
   value: T;
   left: TreeNode<T> | null = null;
   right: TreeNode<T> | null = null;
@@ -9,16 +9,16 @@ class TreeNode<T> {
     this.value = value;
   }
   // 是否是父节点的左子节点
-  isLeftChild() {
+  get isLeftChild() {
     return this.parent !== null && this.parent.left === this;
   }
   // 是否是父节点的右子节点
-  isRightChild() {
+  get isRightChild() {
     return this.parent !== null && this.parent.right === this;
   }
 }
 
-class BSTree<T> {
+export class BSTree<T> {
   private root: TreeNode<T> | null = null;
   // 打印
   print() {
@@ -179,7 +179,7 @@ class BSTree<T> {
     if (removeNode.left === null && removeNode.right === null) {
       if (removeNode.parent) {
         // 判断removeNode是否是父节点的左子节点
-        if (removeNode.isLeftChild()) {
+        if (removeNode.isLeftChild) {
           removeNode.parent.left = null;
         } else {
           removeNode.parent.right = null;
@@ -193,7 +193,7 @@ class BSTree<T> {
     else if (removeNode.left === null || removeNode.right === null) {
       if (removeNode.parent) {
         // 判断removeNode是否是父节点的左子节点
-        if (removeNode.isLeftChild()) {
+        if (removeNode.isLeftChild) {
           removeNode.parent.left = removeNode.left || removeNode.right;
         } else {
           removeNode.parent.right = removeNode.left || removeNode.right;
@@ -209,7 +209,7 @@ class BSTree<T> {
       const successor = this.getSuccessor(removeNode);
       if (removeNode.parent) {
         // 判断removeNode是否是父节点的左子节点
-        if (removeNode.isLeftChild()) {
+        if (removeNode.isLeftChild) {
           removeNode.parent.left = successor;
         } else {
           removeNode.parent.right = successor;
@@ -222,30 +222,30 @@ class BSTree<T> {
   }
 }
 
-const bst = new BSTree<number>();
-bst.insert(11);
-bst.insert(7);
-bst.insert(5);
-bst.insert(3);
-bst.insert(9);
-bst.insert(8);
-bst.insert(10);
-bst.insert(15);
-bst.insert(13);
-bst.insert(12);
-bst.insert(14);
-bst.insert(20);
-bst.insert(18);
-bst.insert(25);
-bst.insert(19);
+// const bst = new BSTree<number>();
+// bst.insert(11);
+// bst.insert(7);
+// bst.insert(5);
+// bst.insert(3);
+// bst.insert(9);
+// bst.insert(8);
+// bst.insert(10);
+// bst.insert(15);
+// bst.insert(13);
+// bst.insert(12);
+// bst.insert(14);
+// bst.insert(20);
+// bst.insert(18);
+// bst.insert(25);
+// bst.insert(19);
 // bst.preOrderTraverse()
 // bst.inOrderTraverse()
 // bst.postOrderTraverse()
 // bst.levelOrderTraverse()
-bst.print()
-bst.remove(15);
-bst.remove(7);
-bst.remove(8);
-bst.remove(11);
-bst.print()
+// bst.print()
+// bst.remove(15);
+// bst.remove(7);
+// bst.remove(8);
+// bst.remove(11);
+// bst.print()
 export {};
