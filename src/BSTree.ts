@@ -19,20 +19,27 @@ export class TreeNode<T> {
 }
 
 export class BSTree<T> {
-  private root: TreeNode<T> | null = null;
+  protected root: TreeNode<T> | null = null;
+  // 创建节点
+  protected createTreeNode(value: T): TreeNode<T> {
+    return new TreeNode(value);
+  }
   // 打印
   print() {
     btPrint(this.root);
   }
+  // 检查是否平衡
+  checkBalance(node: TreeNode<T> | null, isStartFromParent = true) {}
   // 插入
   insert(value: T) {
-    const node = new TreeNode(value);
+    const node = this.createTreeNode(value);
     if (this.root === null) {
       this.root = node;
-      return;
     } else {
       this.insertNode(this.root, node);
     }
+    // 检查是否平衡
+    this.checkBalance(node);
   }
   insertNode(node: TreeNode<T>, newNode: TreeNode<T>) {
     if (newNode.value < node.value) {
@@ -50,7 +57,7 @@ export class BSTree<T> {
         this.insertNode(node.right, newNode);
       }
     } else {
-      console.warn('The value is already in the tree');
+      console.warn('The value is already in the tree', newNode.value);
     }
   }
   // 先序遍历
@@ -150,6 +157,7 @@ export class BSTree<T> {
     // 处理后继结点的左子节点
     successor.left = node.left;
     node.left!.parent = successor;
+    node.left = null;
     // 处理后继节点的右子节点
     // 如果后继节点是要删除节点的右子节点 则不用处理
     if (successor !== node.right) {
@@ -164,14 +172,15 @@ export class BSTree<T> {
       successor.right = node.right;
       node.right!.parent = successor;
     }
-    // 处理后继节点的父节点
-    successor.parent = node.parent;
     return successor;
   }
   // 删除
   remove(value: T) {
+    // 检查节点是否平衡的开始节点
+    let checkBlcStart: TreeNode<T> | null = null;
     // 获取要删除的节点
     const removeNode = this.searchNode(value);
+    // 如果删除节点不存在 直接return
     if (removeNode === null) {
       return false;
     }
@@ -188,6 +197,7 @@ export class BSTree<T> {
         // 如果是根节点
         this.root = null;
       }
+      checkBlcStart = removeNode.parent;
     }
     // 删除节点只有一个子节点
     else if (removeNode.left === null || removeNode.right === null) {
@@ -202,11 +212,21 @@ export class BSTree<T> {
         // 如果是根节点
         this.root = removeNode.left || removeNode.right;
       }
+      checkBlcStart = removeNode.parent;
+      // 处理removeNode子节点的父节点
+      (removeNode.left || removeNode.right)!.parent = removeNode.parent;
     }
     // 删除节点有两个子节点
     else {
       // 获取后继节点
       const successor = this.getSuccessor(removeNode);
+      // 如果后置节点就是removeNode的右节点 checkBlcStart需要赋值为successor
+      // 因为removeNode要被删除了 不能参与到旋转操作中
+      if (successor === removeNode.right) {
+        checkBlcStart = successor
+      } else {
+        checkBlcStart = successor.parent
+      }
       if (removeNode.parent) {
         // 判断removeNode是否是父节点的左子节点
         if (removeNode.isLeftChild) {
@@ -218,7 +238,11 @@ export class BSTree<T> {
         // 如果是根节点
         this.root = successor;
       }
+      // 处理后继节点的父节点
+      successor.parent = removeNode.parent;
     }
+    // 删除完成后 检查树平衡
+    this.checkBalance(checkBlcStart, false);
   }
 }
 

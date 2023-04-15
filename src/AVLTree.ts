@@ -1,5 +1,5 @@
 import { btPrint } from 'hy-algokit';
-import { TreeNode } from './BSTree';
+import { BSTree, TreeNode } from './BSTree';
 
 // AVl树节点
 class AVLTreeNode<T> extends TreeNode<T> {
@@ -50,6 +50,7 @@ class AVLTreeNode<T> extends TreeNode<T> {
     this.parent = pivot;
     // 如果pivot是根节点，返回pivot
     if (!pivot.parent) return pivot;
+    return null
   }
   // 左旋转
   rotateLeft() {
@@ -74,6 +75,7 @@ class AVLTreeNode<T> extends TreeNode<T> {
     this.parent = pivot;
     // 如果pivot是根节点，返回pivot
     if (!pivot.parent) return pivot;
+    return null
   }
   // 左右旋转封装 传入旋转方向
   rotateByDir(direction: 'left' | 'right') {
@@ -98,8 +100,94 @@ class AVLTreeNode<T> extends TreeNode<T> {
     this.parent = pivot;
     // 如果pivot是根节点，返回pivot
     if (!pivot.parent) return pivot;
+    // 默认返回null 意味着不需要更新根节点
+    return null;
   }
 }
+
+class AVLTree<T> extends BSTree<T> {
+  // 重写创建节点方法
+  protected createTreeNode(value: T): TreeNode<T> {
+    return new AVLTreeNode(value);
+  }
+  // 重新平衡非平衡节点
+  rebalance(unbalancedNode: AVLTreeNode<T>) {
+    // 获取pivot节点
+    const pivot = unbalancedNode.higherChild!;
+    // 获取导致不平衡的节点
+    const theCauseNode = pivot.higherChild!;
+    // 如果旋转后pivot没有父节点 则将其设置为根节点
+    let newRoot: AVLTreeNode<T> | null = null;
+    // 区分四种情况 LL LR RL RR
+    // 如果pivot是左子节点 一定是LL或者LR
+    if (pivot.isLeftChild) {
+      if (theCauseNode.isLeftChild) {
+        // LL 右旋转
+        newRoot = unbalancedNode.rotateByDir('right');
+      } else {
+        // LR 先左旋转 以pivot为root theCauseNode为轴心 
+        pivot.rotateByDir('left');
+        // 再右旋转 以unbalancedNode为root pivot为轴心 
+        newRoot = unbalancedNode.rotateByDir('right');
+      }
+    } else {
+      // 如果pivot是右子节点 一定是RL或者RR
+      if (theCauseNode.isLeftChild) {
+        // RL 先右旋转 以pivot为root theCauseNode为轴心 
+        pivot.rotateByDir('right');
+        // 再左旋转 以unbalancedNode为root pivot为轴心 
+        newRoot = unbalancedNode.rotateByDir('left');
+      } else {
+        // RR 左旋转
+        newRoot = unbalancedNode.rotateByDir('left');
+      }
+    }
+    // 如果newRoot存在 则将其设置为根节点
+    if (newRoot) this.root = newRoot;
+  }
+  // 实现检查是否平衡 isStartFromParent为false时表示从当前节点开始向上遍历，此时代表删除操作
+  checkBalance(node: AVLTreeNode<T> | null, isStartFromParent = true) {
+    let cur = isStartFromParent ? node!.parent : node;
+    // 从当前节点的父节点开始向上遍历
+    while (cur) {
+      // 如果不平衡 则进行平衡操作
+      if (!cur.isBalanced) {
+        this.rebalance(cur);
+        // 插入只会导致一个节点不平衡 直接break即可
+        if (isStartFromParent) break;
+        // 删除可能会导致多个节点不平衡 所以需要继续向上遍历
+      }
+      cur = cur.parent;
+    }
+  }
+}
+
+// 测试
+const avl = new AVLTree<number>();
+// 随机删除测试
+const removeArr: number[] = [];
+for(let i = 0; i < 20; i++) {
+  const redom = Math.floor(Math.random() * 400);
+  if (i < 5) {
+    removeArr.push(redom);
+  }
+  avl.insert(redom);
+}
+avl.print();
+console.log(removeArr)
+removeArr.forEach(item => {
+  avl.remove(item);
+  // avl.print();
+})
+// 自定义数据测试
+// avl.insert(50);
+// avl.insert(25);
+// avl.insert(100);
+// avl.insert(12);
+// avl.insert(150);
+// avl.remove(25)
+// avl.remove(12)
+avl.print();
 
 // 测试右旋转
 // const node1 = new AVLTreeNode(3);
@@ -117,18 +205,18 @@ class AVLTreeNode<T> extends TreeNode<T> {
 // node1.rotateByDir('right')
 // btPrint(parent);
 // 测试左旋转
-const node1 = new AVLTreeNode(2);
-const node2 = new AVLTreeNode(3);
-const node3 = new AVLTreeNode(4);
-const parent = new AVLTreeNode(1);
-parent.right = node1;
-node1.parent = parent;
-node1.right = node2;
-node2.parent = node1;
-node2.right = node3;
-node3.parent = node2;
-btPrint(parent);
+// const node1 = new AVLTreeNode(2);
+// const node2 = new AVLTreeNode(3);
+// const node3 = new AVLTreeNode(4);
+// const parent = new AVLTreeNode(1);
+// parent.right = node1;
+// node1.parent = parent;
+// node1.right = node2;
+// node2.parent = node1;
+// node2.right = node3;
+// node3.parent = node2;
+// btPrint(parent);
 // node1.rotateLeft();
-node1.rotateByDir('left')
-btPrint(parent);
+// node1.rotateByDir('left')
+// btPrint(parent);
 export {}
