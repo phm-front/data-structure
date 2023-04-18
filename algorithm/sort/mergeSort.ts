@@ -28,4 +28,4 @@ function mergeSortedArr(a: number[], b: number[]) {
 
 // 测试
 testSort(mergeSort)
-measureSort(mergeSort, 10000)
+measureSort(mergeSort, 100000)
