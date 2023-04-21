@@ -11,5 +11,8 @@
   "license": "ISC",
   "dependencies": {
     "hy-algokit": "^1.4.0"
+  },
+  "devDependencies": {
+    "@types/node": "^18.15.12"
   }
 }
